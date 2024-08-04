@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-l)nd#7q8=1wo_t8aqzu^t072=r*nyhzua+9czd(re!f#d65a_v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['django-askmedi.onrender.com']
+ALLOWED_HOSTS = [
+  "django-askmedi.onrender.com"
+]
 
 
 # Application definition
@@ -59,6 +61,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3001',
     'http://localhost:3000',
+    'https://ask-medi-julianacholders-projects.vercel.app'
 ] 
 
 CORS_ALLOW_CREDENTIALS = True
