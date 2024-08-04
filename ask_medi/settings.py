@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-l)nd#7q8=1wo_t8aqzu^t072=r*nyhzua+9czd(re!f#d65a_v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['django-askmedi.onrender.com', 'localhost', '127.0.0.1']
-
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
