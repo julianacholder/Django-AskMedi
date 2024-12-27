@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-l)nd#7q8=1wo_t8aqzu^t072=r*nyhzua+9czd(re!f#d65a_v
 DEBUG = True
 
 ALLOWED_HOSTS = [
-  "django-askmedi.onrender.com"
+  "127.0.0.1"
 ]
 
 
@@ -62,6 +62,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3001',
     'http://localhost:3000',
     'https://ask-medi-julianacholders-projects.vercel.app'
+    'https://ask-medi.vercel.app/'
 ] 
 
 CORS_ALLOW_CREDENTIALS = True

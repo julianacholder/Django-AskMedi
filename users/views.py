@@ -6,23 +6,13 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .serializers import UserSerializer
-from .models import CustomUser, VerificationToken
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserSummarySerializer
+from .models import CustomUser, VerificationToken, UserSummary
 from .utils import send_otp_email
 from django.utils import timezone
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
-from .models import UserSummary
-from .serializers import UserSummarySerializer
-from rest_framework.decorators import api_view
-from rest_framework.views import APIView
-from .authentication import CsrfExemptSessionAuthentication
-from rest_framework.authentication import BasicAuthentication
-
 
 class StoreSummaryAndDiagnosisView(APIView):
-   
     authentication_classes = [] 
     permission_classes = [AllowAny] 
 
@@ -36,6 +26,7 @@ class StoreSummaryAndDiagnosisView(APIView):
 class GetSummariesView(APIView):
     authentication_classes = [] 
     permission_classes = [AllowAny]
+    
     def get(self, request, user_id):
         summaries = UserSummary.objects.filter(user_id=user_id)
         serializer = UserSummarySerializer(summaries, many=True)
@@ -43,6 +34,7 @@ class GetSummariesView(APIView):
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+    
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -50,8 +42,10 @@ class RegisterView(APIView):
             send_otp_email(user)
             return Response({"message": "User registered. Check your email for OTP.", "email": user.email}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get('email')
         otp = request.data.get('otp')
@@ -70,6 +64,7 @@ class VerifyOTPView(APIView):
 
 class ResendOTPView(APIView):
     permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get('email')
         try:
@@ -80,7 +75,6 @@ class ResendOTPView(APIView):
             return Response({"message": "New OTP sent"}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -100,24 +94,28 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
+    
     def post(self, request):
         logout(request)
         return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
 
 class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
-
+    
     def get(self, request, token):
-        verification_token = get_object_or_404(VerificationToken, token=token)
-        user = verification_token.user
-        user.is_verified = True
-        user.save()
-        verification_token.delete()
-        return Response({"message": "Email verified successfully"}, status=status.HTTP_200_OK)
+        try:
+            verification_token = get_object_or_404(VerificationToken, token=token)
+            user = verification_token.user
+            user.is_verified = True
+            user.save()
+            verification_token.delete()
+            return Response({"message": "Email verified successfully"}, status=status.HTTP_200_OK)
+        except VerificationToken.DoesNotExist:
+            return Response({"message": "Invalid or expired verification token"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
-
+    
     def post(self, request):
         user = request.user
         old_password = request.data.get('old_password')
@@ -139,11 +137,11 @@ class ChangePasswordView(APIView):
     
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated]
-
+    
     def get(self, request):
-        print(request.user)
         if request.user.is_authenticated:
             serializer = UserSerializer(request.user)
             return Response(serializer.data)
         else:
             return Response({"message": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
